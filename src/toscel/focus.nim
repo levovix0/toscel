@@ -1,4 +1,4 @@
-import sigui/[uiobj, properties]
+import pkg/sigui/[uiobj, properties, mouseArea]
 
 type
   FocusSource* = enum
@@ -7,8 +7,13 @@ type
     focusDefault
     focusProgrammable
 
+  FocusItem* = distinct Uiobj
+
 var currentFocus*: Property[Uiobj]
 var currentFocusSource*: FocusSource  # must be changed just before change of currentFocus
+
+# todo: FocusRoot
+# todo: implement focusFromKeyboard
 
 
 proc setFocus*(item: Uiobj, source: FocusSource = focusProgrammable) =
@@ -16,11 +21,9 @@ proc setFocus*(item: Uiobj, source: FocusSource = focusProgrammable) =
   currentFocus[] = item
 
 
-type
-  FocusItem* = object
+proc addChild*(parent: MouseArea, focusItem: FocusItem) =
+  parent.pressed.changed.connectTo parent:
+    if parent.pressed[]:
+      focusItem.Uiobj.setFocus focusFromMouse
 
-
-proc addChild*(parent: Uiobj, _: typedesc[FocusItem]) =
-  parent.onSignal.connectTo parent:
-    ##
-
+proc initIfNeeded*(focusItem: FocusItem) = discard

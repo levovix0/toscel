@@ -7,17 +7,17 @@ type
     icon*: Property[Icon]
     accent*: Property[bool]
     
+    pressedByKeyboard: Property[bool]
+
     m_background: UiRect
     m_svgImage: UiSvgImage
     m_text: UiText
+
 
 proc firstHandHandler_hook*(this: Button, name: static string, origType: typedesc)
 
 registerComponent Button
 
-
-proc clicked*(this: Button): var Event[void] =
-  this.mouseDownAndUpInside
 
 proc activated*(this: Button): var Event[void] =
   this.mouseDownAndUpInside
@@ -63,7 +63,13 @@ proc onIconChanged(this: Button) =
 method init(this: Button) =
   procCall this.super.init()
 
+
   this.makeLayout:
+    on currentFocus.changed:
+      root.pressedByKeyboard[] = false
+
+    - FocusItem root
+
     - RectShadow.new:
       w = binding: root.w[] + 12
       h = binding: root.h[] + 12
@@ -78,9 +84,12 @@ method init(this: Button) =
       this.fill parent
       radius = 5
       color = binding:
-        # todo: focusReason == NOT_MOUSE
-        # if currentFocus[] == root: "96AE79".color
-        if root.accent[]: color_border_accent_button
+        if currentFocus[] == root and currentFocusSource notin {focusFromMouse, focusDefault}:
+          let c = if root.accent[]: color_border_accent_button.lighten(0.1)
+          else: color_border_accent_button
+          if root.pressed[] or root.pressedByKeyboard[]: c.darken(0.2)
+          else: c
+        elif root.accent[]: color_border_accent_button
         else: color_border_button
 
       - this.color.transition(0.1's):
@@ -91,11 +100,11 @@ method init(this: Button) =
         radius = 4
         color = binding:
           if root.accent[]:
-            if root.pressed[]: color_bg_accent_button_pressed
+            if root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed
             elif root.hovered[]: color_bg_accent_button_hovered
             else: color_bg_accent_button
           else:
-            if root.pressed[]: color_bg_button_pressed
+            if root.pressed[] or root.pressedByKeyboard[]: color_bg_button_pressed
             elif root.hovered[]: color_bg_button_hovered
             else: color_bg_button
 
@@ -115,15 +124,24 @@ method init(this: Button) =
       
       - this.color.transition(0.1's):
         easing = outSquareEasing
-    
-    on this.pressed[] == true:
-      setFocus root, focusFromMouse
-      # todo: unfocus on pressing esc
-      # todo: unfocus on pressing on window
   
 
   this.m_text.w.changed.connectTo this: this.adjustSize()
   this.m_text.h.changed.connectTo this: this.adjustSize()
+
+
+method recieve*(this: Button, signal: Signal) =
+  procCall this.super.recieve(signal)
+
+  if currentFocus[] == this:
+    if signal of WindowEvent and signal.WindowEvent.event of KeyEvent and signal.WindowEvent.handled == false:
+      let e = (ref KeyEvent)signal.WindowEvent.event
+      if e.key in {Key.space, Key.enter}:
+        signal.WindowEvent.handled = true
+        if this.pressedByKeyboard[] and e.pressed == false:
+          this.activated.emit()
+        this.pressedByKeyboard[] = e.pressed
+
 
 
 proc firstHandHandler_hook*(this: Button, name: static string, origType: typedesc) =
@@ -140,19 +158,30 @@ when isMainModule:
     let win = newSiwinGlobals().newOpenglWindow(size=ivec2(200, 100)).newUiWindow
 
     win.makeLayout:
-      clearColor = color_bg
-      - Button.new:
-        this.centerIn parent
-        text = "Hello, world!"
-        icon = "document-new".icon
-        on this.clicked:
-          echo "clicked!"
-        
-        - globalKeybinding({Key.space}):
-          on this.activated:
-            parent.accent[] = not parent.accent[]
+      this.clearColor = color_bg
 
-        win.siwinWindow.minSize = ivec2(this.w[].int32 + 10, this.h[].int32 + 10)
+      - globalKeybinding({Key.space}):
+        on this.activated:
+          btn.accent[] = not btn.accent[]
+
+      - globalKeybinding({Key.tab}):
+        on this.activated:
+          setFocus btn
+      
+      - MouseArea.new:
+        this.fill parent
+
+        - FocusItem root
+
+        - Button.new as btn:
+          this.centerIn parent
+          text = "Hello, world!"
+          icon = "document-new".icon
+          on this.activated:
+            echo "activated!"
+
+          win.siwinWindow.minSize = ivec2(this.w[].int32 + 10, this.h[].int32 + 10)
+
 
     run win.siwinWindow
   

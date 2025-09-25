@@ -1,5 +1,5 @@
 import pkg/siwin, pkg/sigui/uibase
-import tosiba
+import toscel
 
 
 let win = newSiwinGlobals().newOpenglWindow(title="Tosiba component library galery").newUiWindow
