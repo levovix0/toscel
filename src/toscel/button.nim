@@ -1,5 +1,4 @@
 import pkg/sigui/[uibase, mouseArea, animations]
-import siwin
 import ./[icons, fonts, focus, colors]
 
 type
@@ -14,7 +13,11 @@ type
     m_text: UiText
 
 
-proc firstHandHandler_hook*(this: Button, name: static string, origType: typedesc)
+proc onIconChanged(this: Button)
+
+
+addFirstHandHandler Button, "icon": onIconChanged(this); redraw(this)
+
 
 registerComponent Button
 
@@ -143,19 +146,12 @@ method recieve*(this: Button, signal: Signal) =
         this.pressedByKeyboard[] = e.pressed
 
 
-
-proc firstHandHandler_hook*(this: Button, name: static string, origType: typedesc) =
-  this.super.firstHandHandler_hook(name, origType)
-
-  when name == "icon":
-    this.onIconChanged()
-
-
 when isMainModule:
   import sigui/globalKeybinding
+  import siwin
 
   proc main =
-    let win = newSiwinGlobals().newOpenglWindow(size=ivec2(200, 100)).newUiWindow
+    let win = newUiWindow(size=ivec2(200, 100))
 
     win.makeLayout:
       this.clearColor = color_bg
@@ -183,7 +179,7 @@ when isMainModule:
           win.siwinWindow.minSize = ivec2(this.w[].int32 + 10, this.h[].int32 + 10)
 
 
-    run win.siwinWindow
+    run win
   
   main()
 

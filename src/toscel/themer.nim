@@ -1,4 +1,5 @@
 # note: themes are currently not supported
+# todo
 
 when false:
   import pkg/sigui/[uiobj, events, properties, styles]
@@ -15,7 +16,11 @@ when false:
 
       currentTheme: TosibaTheme
 
-  proc firstHandHandler_hook*(this: Themer, name: static string, origType: typedesc)
+
+  proc onThemeChanged*(this: Themer)
+
+  addFirstHandHandler Themer, "theme": onThemeChanged(this)
+
 
   registerComponent Themer
 
@@ -47,13 +52,10 @@ when false:
     this.style[] = this.currentTheme.styleForTheme()
 
 
-  proc firstHandHandler_hook*(this: Themer, name: static string, origType: typedesc) =
-    this.super.firstHandHandler_hook(name, origType)
-
-    when name == "theme":
-      let t = this.theme[].themeToUse()
-      if this.currentTheme != t:
-        this.currentTheme = t
-        this.on_currentTheme_changed()
+  proc onThemeChanged*(this: Themer) =
+    let t = this.theme[].themeToUse()
+    if this.currentTheme != t:
+      this.currentTheme = t
+      this.on_currentTheme_changed()
 
 
