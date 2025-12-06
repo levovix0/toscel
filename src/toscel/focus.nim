@@ -27,3 +27,4 @@ proc addChild*(parent: MouseArea, focusItem: FocusItem) =
       focusItem.Uiobj.setFocus focusFromMouse
 
 proc initIfNeeded*(focusItem: FocusItem) = discard
+proc markCompleted*(focusItem: FocusItem) = discard

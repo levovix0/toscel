@@ -44,7 +44,7 @@ proc adjustSize(this: Button) =
 proc onIconChanged(this: Button) =
   if this.icon == nil:
     if this.m_svgImage != nil:
-      deteach this.m_svgImage
+      delete this.m_svgImage
       this.m_svgImage = nil
       this.m_text.left = this.left + 10
   
