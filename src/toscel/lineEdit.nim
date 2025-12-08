@@ -42,11 +42,14 @@ method init*(this: LineEdit) =
       
 
     - TextArea.new as textArea:
-      this.fill(parent, 10, 9)
+      this.fill(parent)
       root.textArea = this
     
       text = binding: root.text[]
       root.text[] = binding: this.text[]
+
+      + this.textArea:
+        this.fill(this.parent, 10, 9)
 
       + this.textObj[]:
         font = font_default.withSize(14)
