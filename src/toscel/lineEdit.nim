@@ -1,5 +1,5 @@
 import sigui/[uibase, textArea, animations]
-import ./[colors, fonts]
+import ./[colors, fonts, focus]
 
 
 type LineEdit* = ref object of Uiobj
@@ -48,10 +48,17 @@ method init*(this: LineEdit) =
       text = binding: root.text[]
       root.text[] = binding: this.text[]
 
+      on this.active[] == true:
+        if currentFocus[] != root:
+          setFocus root
+      
+      on currentFocus[] == root:
+        this.active[] = true
+
       + this.textArea:
         this.fill(this.parent, 10, 9)
 
-      + this.textObj[]:
+      + this.textObj:
         font = font_default.withSize(14)
 
         color = binding:

@@ -31,9 +31,19 @@ proc text*(this: Button): var Property[string] =
 
 
 proc adjustSize(this: Button) =
-  let minW = 10 + (if this.icon != nil: this.m_text.h[] + 10 else: 0) + this.m_text.w[] + 10
+  let textH =
+    if this.m_text.h[] == 0:
+      if this.m_text.font[] != nil: this.m_text.font[].size + 2
+      else: 14 + 2
+    else: this.m_text.h[]
+  
+  let minW =
+    10 +
+    (if this.icon != nil: textH + 10 else: 0) +
+   ( if this.m_text.text != "": this.m_text.w[] + 10 else: 0)
+
   if this.w[] < minW: this.w[] = minW
-  this.h[] = 6 + this.m_text.h[] + 6
+  this.h[] = 6 + textH + 6
   
   if this.m_svgImage != nil:
     this.m_svgImage.imageWh[] = vec2(this.m_text.h[], this.m_text.h[]).ivec2

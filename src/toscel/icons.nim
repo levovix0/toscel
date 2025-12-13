@@ -12,10 +12,10 @@ iterator systemIcons*(): string =
     return
   else:
     # if dirExists("~/.local/share/icons/breeze-dark/actions/16/"):
-    for path in walkDirRec("~/.local/share/icons/breeze-dark/actions/16/"):
+    for path in walkDirRec("~/.local/share/icons/breeze-dark/actions/16/", {pcFile, pcLinkToFile}):
       if path.splitFile.ext == ".svg":
         yield path
-    for path in walkDirRec("/usr/share/icons/breeze-dark/actions/16/"):
+    for path in walkDirRec("/usr/share/icons/breeze-dark/actions/16/", {pcFile, pcLinkToFile}):
       if path.splitFile.ext == ".svg":
         yield path
 
