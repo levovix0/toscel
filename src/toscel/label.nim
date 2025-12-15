@@ -2,17 +2,28 @@ import sigui/[uibase, textArea]
 import ./[colors, fonts, focus]
 
 
-type Label* = ref object of Uiobj
-  text*: Property[string]
-  color*: Property[Color] = color_fg.property
-  fontSize*: Property[float32] = 14'f32.property
-  font*: Property[Typeface]
+type
+  ThemedUiText* = ref object of UiText
+    ## UiText that follows toscel theme
 
-  textArea*: TextArea
+  Label* = ref object of Uiobj
+    text*: Property[string]
+    color*: Property[Color] = color_fg.property
+    fontSize*: Property[float32] = 14'f32.property
+    font*: Property[Typeface]
 
-  fitTextBinding*: EventHandler
+    textArea*: TextArea
 
-  # popup*: Uiobj
+    fitTextBinding*: EventHandler
+
+    # popup*: Uiobj
+
+
+method init*(this: ThemedUiText) =
+  procCall this.super.init()
+  
+  this.color[] = color_fg
+  this.font[] = font_default.withSize(14)
 
 
 method init*(this: Label) =
@@ -49,4 +60,8 @@ method init*(this: Label) =
       
       + this.cursorObj[].UiRect:
         color = color_fg_active
+
+
+proc unselectable*(t: typedesc[Label]): ThemedUiText = new ThemedUiText
+proc themed*(t: typedesc[UiText]): ThemedUiText = new ThemedUiText
 
