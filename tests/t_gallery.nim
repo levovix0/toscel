@@ -10,10 +10,15 @@ win.makeLayout:
 
   - Layout.col:
     this.centerIn parent
+    align = center
     gap = 10
 
     - Layout.row:
+      align = center
       gap = 10
+
+      - Label.new:
+        text = "Label"
 
       - Button.new:
         text = "Button"
