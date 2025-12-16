@@ -1,5 +1,5 @@
 import sigui/[uibase, textArea, animations]
-import ./[colors, fonts, focus]
+import ./[colors, fonts, focus, transitions]
 
 
 type LineEdit* = ref object of Uiobj
@@ -39,8 +39,7 @@ method init*(this: LineEdit) =
           if textArea.active[]: color_border_accent_lineEdit_invalid
           else: color_border_lineEdit_invalid
       
-      - this.color.transition(0.2's):
-        easing = outSquareEasing
+      addTransition this.color, 0.2's
       
 
     - TextArea.new as textArea:
@@ -67,8 +66,7 @@ method init*(this: LineEdit) =
           if textArea.active[]: color_fg_active
           else: color_fg
       
-        - this.color.transition(0.2's):
-          easing = outSquareEasing
+        addTransition this.color, 0.2's
     
         - UiText.new:
           centerY = parent.center
@@ -80,8 +78,7 @@ method init*(this: LineEdit) =
             if root.text[] == "": visible
             else: collapsed
       
-          - this.color.transition(0.2's):
-            easing = outSquareEasing
+          addTransition this.color, 0.2's
 
           color = binding:
             if textArea.active[]: color_fg_placeholder_active

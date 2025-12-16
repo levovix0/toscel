@@ -1,10 +1,13 @@
 import pkg/sigui/[uibase, mouseArea, animations]
-import ./[icons, fonts, focus, colors]
+import ./[icons, fonts, focus, colors, transitions]
 
 type
   Button* = ref object of MouseArea
     icon*: Property[Icon]
     accent*: Property[bool]
+    enabled*: Property[bool] = true.property
+    
+    activated*: Event[void]
     
     pressedByKeyboard: Property[bool]
 
@@ -20,10 +23,6 @@ addFirstHandHandler Button, "icon": onIconChanged(this); redraw(this)
 
 
 registerComponent Button
-
-
-proc activated*(this: Button): var Event[void] =
-  this.mouseDownAndUpInside
 
 
 proc text*(this: Button): var Property[string] =
@@ -78,6 +77,10 @@ method init(this: Button) =
 
 
   this.makeLayout:
+    on this.mouseDownAndUpInside:
+      if this.enabled[]:
+        this.activated.emit()
+
     on currentFocus.changed:
       root.pressedByKeyboard[] = false
 
@@ -92,37 +95,42 @@ method init(this: Button) =
       radius = 5
       color = color_shadow
 
-    - UiRect.new as bg:
+    - UiRect.new as border:
       root.m_background = this
       this.fill parent
       radius = 5
       color = binding:
-        if currentFocus[] == root and currentFocusSource notin {focusFromMouse, focusDefault}:
-          let c = if root.accent[]: color_border_accent_button.lighten(0.1)
-          else: color_border_accent_button
+        if not root.enabled[]:
+          if root.accent[]: color_border_button_disabled
+          else: color_border_accent_button_disabled
+        elif currentFocus[] == root and currentFocusSource notin {focusFromMouse, focusDefault}:
+          let c =
+            if root.accent[]: color_border_accent_button.lighten(0.1)
+            else: color_border_accent_button
           if root.pressed[] or root.pressedByKeyboard[]: c.darken(0.2)
           else: c
         elif root.accent[]: color_border_accent_button
         else: color_border_button
 
-      - this.color.transition(0.1's):
-        easing = outSquareEasing
+      addTransition this.color
 
       - UiRect.new:
         this.fill parent, 1
         radius = 4
         color = binding:
           if root.accent[]:
-            if root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed
+            if not root.enabled[]: color_bg_accent_button_disabled
+            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed
+            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed
             elif root.hovered[]: color_bg_accent_button_hovered
             else: color_bg_accent_button
           else:
-            if root.pressed[] or root.pressedByKeyboard[]: color_bg_button_pressed
+            if not root.enabled[]: color_bg_button_disabled
+            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_button_pressed
             elif root.hovered[]: color_bg_button_hovered
             else: color_bg_button
 
-        - this.color.transition(0.1's):
-          easing = outSquareEasing
+        addTransition this.color
 
     - UiText.new:
       root.m_text = this
@@ -131,12 +139,12 @@ method init(this: Button) =
       font = font_default.withSize(14)
 
       color = binding:
-        if root.accent[]: color_fg_accent
+        if not root.enabled[]: color_fg_disabled
+        elif root.accent[]: color_fg_accent
         elif root.pressed[] or root.hovered[]: color_fg_active
         else: color_fg
       
-      - this.color.transition(0.1's):
-        easing = outSquareEasing
+      addTransition this.color
   
 
   this.m_text.w.changed.connectTo this: this.adjustSize()

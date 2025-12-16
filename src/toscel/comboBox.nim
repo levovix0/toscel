@@ -1,7 +1,7 @@
 import std/[math]
 import pkg/pixie/[fonts]
 import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations]
-import ./[colors, icons, fonts, lineEdit]
+import ./[colors, icons, fonts, lineEdit, transitions]
 
 
 type
@@ -135,8 +135,7 @@ method init*(this: ComboBox) =
                 signal.WindowEvent.handled = true
 
 
-        - this.y.transition(0.1's):
-          easing = outSquareEasing
+        addTransition this.y
 
         - Layout.vbox:
           this.fill(parent)
@@ -162,8 +161,7 @@ method init*(this: ComboBox) =
                     elif parent.hovered[]: color_bg_button_hovered
                     else: color_bg_button
                 
-                - this.color.transition(0.1's):
-                  easing = outSquareEasing
+                addTransition this.color
 
               - UiText.new:
                 this.left = parent.left + padding_default_horizontal
@@ -178,8 +176,7 @@ method init*(this: ComboBox) =
                     if parent.hovered[]: color_fg_active
                     else: color_fg
                 
-                - this.color.transition(0.1's):
-                  easing = outSquareEasing
+                addTransition this.color
               
               on this.mouseDownAndUpInside:
                 root.selectedOption[] = optionI

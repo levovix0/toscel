@@ -39,13 +39,10 @@ method init*(this: Label) =
       this.fill(parent)
       root.textArea = this
 
-      this.textObj.w.changed.connectTo root.fitTextBinding:
-        root.w[] = this.textObj.w[] + 2
+      root.w[] = binding(root.fitTextBinding): this.textObj.w[] + 2
+      root.h[] = binding(root.fitTextBinding): this.textObj.h[]
 
-      this.textObj.h.changed.connectTo root.fitTextBinding:
-        root.h[] = this.textObj.h[]
-
-      this.allowedInteractions = this.allowedInteractions - {textInput}
+      this.allowedInteractions.excl textInput
     
       text = binding: root.text[]
 
@@ -58,7 +55,6 @@ method init*(this: Label) =
 
       + this.textObj:
         font = binding: root.font[].withSize(root.fontSize[])
-
         color = binding: root.color[]
       
       + this.cursorObj[].UiRect:
