@@ -14,6 +14,7 @@ const color_bg_accent_button_pressed* = color_accent.darken(0.1)
 
 const color_fg* = "#cbcbcb".color
 const color_fg_active* = "#ffffff".color
+const color_fg_pressed* = "#ababab".color
 const color_fg_accent* = "#202020".color
 const color_fg_placeholder* = "#8b8b8b".color
 const color_fg_placeholder_active* = "#ababab".color
@@ -28,4 +29,15 @@ const color_border_lineEdit_invalid* = "#f06060".color
 const color_border_accent_lineEdit_invalid* = color_border_lineEdit_invalid.lighten(0.1)
 
 const color_shadow* = "#00000060".color
+
+const radius_default* = 5
+
+const borderWidth_default* = 1
+
+const fontSize_default* = 14
+
+const padding_default_horizontal* = 9
+const padding_default_vertical* = 9
+
+const width_control_default* = 100
 

@@ -25,6 +25,9 @@ win.makeLayout:
 
       - LineEdit.new:
         text = "LineEdit"
+      
+      - ComboBox.new:
+        options = @["ComboBox", "with", "text", "options"]
 
 
 run win

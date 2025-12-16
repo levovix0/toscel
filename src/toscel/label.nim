@@ -18,6 +18,9 @@ type
 
     # popup*: Uiobj
 
+registerComponent ThemedUiText
+registerComponent Label
+
 
 method init*(this: ThemedUiText) =
   procCall this.super.init()

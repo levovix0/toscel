@@ -15,6 +15,8 @@ type LineEdit* = ref object of Uiobj
   # popupShowAlways*: Property[bool]
   # popup*: Uiobj
 
+registerComponent LineEdit
+
 
 method init*(this: LineEdit) =
   procCall this.super.init()
@@ -27,7 +29,7 @@ method init*(this: LineEdit) =
       this.fill(parent)
       root.border = this
       
-      radius = 5
+      radius = radius_default
       borderWidth = 1
       color = binding:
         if root.valid[]:
