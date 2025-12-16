@@ -56,7 +56,7 @@ method init*(this: LineEdit) =
         this.active[] = true
 
       + this.textArea:
-        this.fill(this.parent, 10, 9)
+        this.fill(this.parent, 10, 7)
 
       + this.textObj:
         font = font_default.withSize(14)
