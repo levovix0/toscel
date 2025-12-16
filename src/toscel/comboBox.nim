@@ -11,9 +11,25 @@ type
 
     dropdownOpened*: Property[bool]
     fitOptionsWidth*: Property[bool] = true.property
+    otherTextCanBeEntered*: Property[bool]
 
+    binding_valid*: EventHandler
+      ## to allow all text be valid or customize validation,
+      ## use `disconnect this.binding_valid` and create new binding for `this.valid` or assign a value to it
+    
+    lineEdit*: LineEdit
 
 registerComponent ComboBox
+
+
+template text*(this: ComboBox): var Property[string] =
+  this.lineEdit.text
+
+template valid*(this: ComboBox): var Property[bool] =
+  this.lineEdit.valid
+
+template placeholder*(this: ComboBox): var Property[string] =
+  this.lineEdit.placeholder
 
 
 method init*(this: ComboBox) =
@@ -34,35 +50,22 @@ method init*(this: ComboBox) =
       this.w[] = padding_default_horizontal + maxW + 2 + padding_default_horizontal + fontSize_default + padding_default_horizontal
 
 
-    this.onSignal.connectTo this, signal:
-      if signal of WindowEvent and signal.WindowEvent.event of ScrollEvent:
-        let e = (ref ScrollEvent)(signal.WindowEvent.event)
-        if not signal.WindowEvent.handled and not root.dropdownOpened[]:
-          let pos = this.parentUiRoot.mouseState.pos - this.globalXy
-          if pos.x in 0'f32..this.w[] and pos.y in 0'f32..this.h[]:
-            if root.options[].len != 0:
-              if e.delta > 0:
-                root.selectedOption[] = (root.selectedOption[] + 1).euclMod(root.options[].len)
-                signal.WindowEvent.handled = true
-              elif e.delta < 0:
-                root.selectedOption[] = (root.selectedOption[] - 1).euclMod(root.options[].len)
-                signal.WindowEvent.handled = true
-
-
     - LineEdit.new:
       this.fill(parent)
+      root.lineEdit = this
 
-      valid = binding: this.text[] in root.options[]
-      text = binding:
+      valid = binding(root.binding_valid): this.text[] in root.options[]
+      
+      binding:
         if root.selectedOption[] in 0..root.options[].high:
-          root.options[][root.selectedOption[]]
-        else:
-          ""
+          this.text.val = root.options[][root.selectedOption[]]
 
       on this.textArea.textEdited:
         let i = root.options[].find(this.text[])
         if i != -1:
           root.selectedOption[] = i
+        elif root.otherTextCanBeEntered[]:
+          root.selectedOption[] = -1
 
       - MouseArea.new as dropdownButton:
         w = padding_default_horizontal + fontSize_default + padding_default_horizontal
@@ -93,6 +96,10 @@ method init*(this: ComboBox) =
     --- ClipRect.new:
       <--- ClipRect.new: root.dropdownOpened[]; root.options[]
 
+      drawLayer = after root.parentUiRoot
+      # todo: global menu/popup layer
+      # todo: signalLayer
+
       if root.dropdownOpened[]:
         let optionHeight = parent.h[]
 
@@ -119,6 +126,13 @@ method init*(this: ComboBox) =
                 elif e.delta < 0:
                   root.selectedOption[] = (root.selectedOption[] - 1).clamp(0, root.options[].high)
                   signal.WindowEvent.handled = true
+          
+          if signal of WindowEvent and signal.WindowEvent.event of KeyEvent:
+            let e = (ref KeyEvent)(signal.WindowEvent.event)
+            if not signal.WindowEvent.handled:
+              if e.key in {Key.space, Key.enter}:
+                root.dropdownOpened[] = false
+                signal.WindowEvent.handled = true
 
 
         - this.y.transition(0.1's):
@@ -178,4 +192,35 @@ method init*(this: ComboBox) =
           borderWidth = borderWidth_default
           color = color_border_lineEdit
 
+
+
+method recieve*(this: ComboBox, signal: Signal) =
+  if signal of WindowEvent and signal.WindowEvent.event of ScrollEvent:
+    let e = (ref ScrollEvent)(signal.WindowEvent.event)
+    if not signal.WindowEvent.handled and not this.dropdownOpened[]:
+      let pos = this.parentUiRoot.mouseState.pos - this.globalXy
+      if pos.x in 0'f32..this.w[] and pos.y in 0'f32..this.h[]:
+        if this.options[].len != 0:
+          if e.delta > 0:
+            this.selectedOption[] = (this.selectedOption[] + 1).euclMod(this.options[].len)
+            signal.WindowEvent.handled = true
+          elif e.delta < 0:
+            this.selectedOption[] = (this.selectedOption[] - 1).euclMod(this.options[].len)
+            signal.WindowEvent.handled = true
+      
+  if signal of WindowEvent and signal.WindowEvent.event of KeyEvent:
+    let e = (ref KeyEvent)(signal.WindowEvent.event)
+    if e.pressed:
+      if this.lineEdit.textArea.active[] and not signal.WindowEvent.handled:
+        if e.key == Key.up:
+          if this.options[].len != 0:
+            this.selectedOption[] = (this.selectedOption[] - 1).euclMod(this.options[].len)
+            signal.WindowEvent.handled = true
+        
+        elif e.key == Key.down:
+          if this.options[].len != 0:
+            this.selectedOption[] = (this.selectedOption[] + 1).euclMod(this.options[].len)
+            signal.WindowEvent.handled = true
+  
+  procCall this.super.recieve(signal)
 
