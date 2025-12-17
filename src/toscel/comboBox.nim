@@ -7,7 +7,7 @@ import ./[colors, icons, fonts, lineEdit, transitions]
 type
   ComboBox* = ref object of Uiobj
     options*: Property[seq[string]]
-    selectedOption*: Property[int]
+    selectedOption*: Property[int] = (-1).property
 
     dropdownOpened*: Property[bool]
     fitOptionsWidth*: Property[bool] = true.property
@@ -17,6 +17,8 @@ type
       ## to allow all text be valid or customize validation,
       ## use `disconnect this.binding_valid` and create new binding for `this.valid` or assign a value to it
     
+    textEdited*: Event[void]
+
     lineEdit*: LineEdit
 
 registerComponent ComboBox
@@ -59,6 +61,7 @@ method init*(this: ComboBox) =
       binding:
         if root.selectedOption[] in 0..root.options[].high:
           this.text.val = root.options[][root.selectedOption[]]
+          root.textEdited.emit()  # todo: emit only if root.selectedOption[] changed and only if by user
 
       on this.textArea.textEdited:
         let i = root.options[].find(this.text[])
@@ -66,11 +69,14 @@ method init*(this: ComboBox) =
           root.selectedOption[] = i
         elif root.otherTextCanBeEntered[]:
           root.selectedOption[] = -1
+        root.textEdited.emit()
 
       - MouseArea.new as dropdownButton:
         w = padding_default_horizontal + fontSize_default + padding_default_horizontal
         h = this.w[]
         right = parent.right
+        visibility = binding:
+          if root.options[].len != 0: visible else: collapsed
       
         - UiSvgImage.new:
           w = fontSize_default

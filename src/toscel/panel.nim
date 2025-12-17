@@ -32,22 +32,6 @@ proc center*(this: Panel, margin: float32 = 0): Anchor =
   this.content.center(margin)
 
 
-proc panelLeft*(this: Panel, margin: float32 = 0): Anchor =
-  this.Uiobj.left(margin)
-
-proc panelRight*(this: Panel, margin: float32 = 0): Anchor =
-  this.Uiobj.right(margin)
-
-proc panelTop*(this: Panel, margin: float32 = 0): Anchor =
-  this.Uiobj.top(margin)
-  
-proc panelBottom*(this: Panel, margin: float32 = 0): Anchor =
-  this.Uiobj.bottom(margin)
-
-proc panelCenter*(this: Panel, margin: float32 = 0): Anchor =
-  this.Uiobj.center(margin)
-
-
 method init*(this: Panel) =
   procCall this.super.init()
 

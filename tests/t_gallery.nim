@@ -35,6 +35,7 @@ win.makeLayout:
         
         - ComboBox.new:
           options = @["ComboBox", "with", "text", "options"]
+          selectedOption = 0
 
 
       - Layout.row:

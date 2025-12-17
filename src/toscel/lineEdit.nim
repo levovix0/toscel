@@ -18,6 +18,10 @@ type LineEdit* = ref object of Uiobj
 registerComponent LineEdit
 
 
+template textEdited*(this: LineEdit): var Event[void] =
+  this.textArea.textEdited
+
+
 method init*(this: LineEdit) =
   procCall this.super.init()
 
