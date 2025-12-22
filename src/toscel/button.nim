@@ -28,6 +28,12 @@ registerComponent Button
 proc text*(this: Button): var Property[string] =
   this.m_text.text
 
+proc clicked*(this: Button): var Event[void] {.deprecated: "ambiguous event, use this.activated for when Button is considered \"clicked\" (recomended, as it also handles \"clicks\" from touchscreen and keyboard), or this.MouseArea.clicked for when mouse pressed and released on this Button without moving. There is also this.mouseDownAndUpInside for when mouse was pressed and released inside this Button but may have moved".} =
+  this.activated
+
+converter asEvent*(this: Button): var Event[void] =
+  this.activated
+
 
 proc adjustSize(this: Button) =
   let textH =
@@ -191,7 +197,7 @@ when isMainModule:
           this.centerIn parent
           text = "Hello, world!"
           icon = "document-new".icon
-          on this.activated:
+          on this:
             echo "activated!"
 
           win.siwinWindow.minSize = ivec2(this.w[].int32 + 10, this.h[].int32 + 10)

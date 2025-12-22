@@ -47,7 +47,9 @@ method init*(this: ComboBox) =
       var maxW = 0'f32
       for text in root.options[]:
         let w = font_default.withSize(fontSize_default).layoutBounds(text).x
-        maxW = max(w, maxW)
+        maxW = max(maxW, w)
+
+      maxW = max(maxW, font_default.withSize(fontSize_default).layoutBounds(this.placeholder[]).x)
       
       this.w[] = padding_default_horizontal + maxW + 2 + padding_default_horizontal + fontSize_default + padding_default_horizontal
 
@@ -83,7 +85,7 @@ method init*(this: ComboBox) =
           h = fontSize_default
           this.centerIn(parent)
           
-          image = "arrow-down".icon.svg
+          image = "arrow-down".icon(fromToscel = true).svg
           color = binding:
             if parent.pressed[]: color_fg_pressed
             elif parent.hovered[]: color_fg_active
@@ -109,10 +111,15 @@ method init*(this: ComboBox) =
       if root.dropdownOpened[]:
         let optionHeight = parent.h[]
 
+        radius = radius_default
         w = binding: parent.w[]
         h = root.options[].len.float32 * optionHeight
-        y = binding: root.selectedOption[].float32 * -optionHeight
-        radius = radius_default
+        y = binding:
+          let y = (root.selectedOption[].float32 * -optionHeight)
+          let min = -root.globalY[]
+          let max = -root.globalY[] + root.parentUiRoot.h[] - this.h[]
+          if min > max: y
+          else: y.clamp(min, max)
 
         this.onSignal.connectTo this, signal:
           if signal of WindowEvent and signal.WindowEvent.event of MouseButtonEvent:
