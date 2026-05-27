@@ -86,7 +86,7 @@ method init*(this: ComboBox) =
           h = fontSize_default
           this.centerIn(parent)
           
-          # image = "arrow-down".icon(fromToscel = true).svg
+          image = "arrow-down".icon(fromToscel = true).svg
           color = binding:
             if parent.pressed[]: color_fg_pressed
             elif parent.hovered[]: color_fg_active
