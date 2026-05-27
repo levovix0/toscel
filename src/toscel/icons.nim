@@ -15,7 +15,7 @@ const iconsPath* {.strdefine.} = currentSourcePath().parentDir.parentDir / "icon
 
 iterator systemIcons*(): string =
   when defined(windows):
-    return
+    discard
   else:
     # if dirExists("~/.local/share/icons/breeze-dark/actions/16/"):
     for path in walkDirRec("~/.local/share/icons/breeze-dark/actions/16/", {pcFile, pcLinkToFile}):
@@ -74,6 +74,5 @@ macro icon*(name: string, fromToscel: static bool = false): Icon =
 when isMainModule:
   proc main =
     echo "document-new".icon.svg
-
   main()
 
