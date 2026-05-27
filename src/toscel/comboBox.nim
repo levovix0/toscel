@@ -5,6 +5,9 @@ import ./[colors, icons, fonts, lineEdit, transitions]
 
 
 type
+  SelectionType* = enum
+    ScrollSelection, ClickSelection
+  
   ComboBox* = ref object of Uiobj
     options*: Property[seq[string]]
     selectedOption*: Property[int] = (-1).property
@@ -18,7 +21,7 @@ type
       ## use `disconnect this.binding_valid` and create new binding for `this.valid` or assign a value to it
     
     textEdited*: Event[void]
-    optionSelected*: Event[void]
+    optionSelected*: Event[SelectionType]
 
     lineEdit*: LineEdit
 
@@ -136,11 +139,11 @@ method init*(this: ComboBox) =
               if root.options[].len != 0:
                 if e.delta > 0:
                   root.selectedOption[] = (root.selectedOption[] + 1).clamp(0, root.options[].high)
-                  root.optionSelected.emit()
+                  root.optionSelected.emit(ScrollSelection)
                   signal.WindowEvent.handled = true
                 elif e.delta < 0:
                   root.selectedOption[] = (root.selectedOption[] - 1).clamp(0, root.options[].high)
-                  root.optionSelected.emit()
+                  root.optionSelected.emit(ScrollSelection)
                   signal.WindowEvent.handled = true
           
           if signal of WindowEvent and signal.WindowEvent.event of KeyEvent:
@@ -197,10 +200,10 @@ method init*(this: ComboBox) =
               on this.mouseDownAndUpInside:
                 root.selectedOption[] = optionI
                 root.dropdownOpened[] = false
-                root.optionSelected.emit()
+                root.optionSelected.emit(ClickSelection)
         
         - UiRectBorder.new:
-          this.drawLayer = after parent
+          layer = after parent
           this.fill(parent)
           radius = radius_default - 2
           borderWidth = borderWidth_default
@@ -217,11 +220,11 @@ method recieve*(this: ComboBox, signal: Signal) =
         if this.options[].len != 0:
           if e.delta > 0:
             this.selectedOption[] = (this.selectedOption[] + 1).euclMod(this.options[].len)
-            this.optionSelected.emit()
+            this.optionSelected.emit(ScrollSelection)
             signal.WindowEvent.handled = true
           elif e.delta < 0:
             this.selectedOption[] = (this.selectedOption[] - 1).euclMod(this.options[].len)
-            this.optionSelected.emit()
+            this.optionSelected.emit(ScrollSelection)
             signal.WindowEvent.handled = true
       
   if signal of WindowEvent and signal.WindowEvent.event of KeyEvent:
@@ -231,13 +234,13 @@ method recieve*(this: ComboBox, signal: Signal) =
         if e.key == Key.up:
           if this.options[].len != 0:
             this.selectedOption[] = (this.selectedOption[] - 1).euclMod(this.options[].len)
-            this.optionSelected.emit()
+            this.optionSelected.emit(ScrollSelection)
             signal.WindowEvent.handled = true
         
         elif e.key == Key.down:
           if this.options[].len != 0:
             this.selectedOption[] = (this.selectedOption[] + 1).euclMod(this.options[].len)
-            this.optionSelected.emit()
+            this.optionSelected.emit(ScrollSelection)
             signal.WindowEvent.handled = true
   
   procCall this.super.recieve(signal)
