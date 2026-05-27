@@ -8,6 +8,8 @@ type
     enabled*: Property[bool] = true.property
     
     activated*: Event[void]
+
+    binding_hugContent*: EventHandler
     
     pressedByKeyboard: Property[bool]
 
@@ -35,6 +37,9 @@ converter asEvent*(this: Button): var Event[void] =
   this.activated
 
 
+proc hugContent(this: Button): bool = this.binding_hugContent.hasHandlers
+
+
 proc adjustSize(this: Button) =
   let textH =
     if this.m_text.h[] == 0:
@@ -47,7 +52,7 @@ proc adjustSize(this: Button) =
     (if this.icon != nil: textH + 10 else: 0) +
    ( if this.m_text.text != "": this.m_text.w[] + 10 else: 0)
 
-  if this.w[] < minW: this.w[] = minW
+  if this.hugContent or this.w[] < minW: this.w[] = minW
   this.h[] = 6 + textH + 6
   
   if this.m_svgImage != nil:
@@ -153,8 +158,8 @@ method init(this: Button) =
       addTransition this.color
   
 
-  this.m_text.w.changed.connectTo this: this.adjustSize()
-  this.m_text.h.changed.connectTo this: this.adjustSize()
+  this.m_text.w.changed.connectTo this.binding_hugContent: this.adjustSize()
+  this.m_text.h.changed.connectTo this.binding_hugContent: this.adjustSize()
 
 
 method recieve*(this: Button, signal: Signal) =
