@@ -18,8 +18,7 @@ proc findLastIncompleteParent*(this: Uiobj): Uiobj =
 template addTransition*[T](prop: var Property[T], duration = 0.1's, easingProc = outSquareEasing) {.dirty.} =
   bind transition, addChild, connect, outSquareEasing, findLastIncompleteParent
   block:
-    let trans = transition(prop, duration)
-    trans.easing[] = easingProc
+    let trans = transition(prop, duration, easingProc)
     connect(findLastIncompleteParent(this).completed, this.eventHandler, proc() = addChild(this, trans))
 
 

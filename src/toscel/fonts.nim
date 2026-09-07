@@ -20,6 +20,7 @@ iterator systemFonts*(): string =
 const defaultSystemFonts* = @["roboto", "ubuntu", "notosans", "arial", "adwaitasans"]
 
 proc findSystemFont*(query: seq[string] = defaultSystemFonts): Typeface =
+  ## todo: load each font (that is loadable), add them as typeface.fallbacks
   for queryEntry in query:
     for path in systemFonts():
       var name = path.splitFile.name.normalize
