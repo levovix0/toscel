@@ -95,7 +95,7 @@ method init*(this: ComboBox) =
             elif parent.hovered[]: color_fg_active
             else: color_fg
         
-        on this.mouseDownAndUpInside:
+        on this.clicked:
           root.dropdownOpened[] = not root.dropdownOpened[]
       
       + this.textArea.textArea:
@@ -106,7 +106,7 @@ method init*(this: ComboBox) =
 
     
     --- ClipRect.new:
-      <--- ClipRect.new: root.dropdownOpened[]; root.options[]
+      <--- {update}: root.dropdownOpened[]; root.options[]
 
       #layer = after root.parentUiRoot
       # todo: global menu/popup layer
@@ -125,7 +125,7 @@ method init*(this: ComboBox) =
           if min > max: y
           else: y.clamp(min, max)
 
-        this.onSignal.connectTo this, signal:
+        this.gotSignal.connectTo this, signal:
           if signal of WindowEvent and signal.WindowEvent.event of MouseButtonEvent:
             let e = (ref MouseButtonEvent)(signal.WindowEvent.event)
             if e.pressed:
@@ -197,7 +197,7 @@ method init*(this: ComboBox) =
                 
                 addTransition this.color
               
-              on this.mouseDownAndUpInside:
+              on this.clicked:
                 root.selectedOption[] = optionI
                 root.dropdownOpened[] = false
                 root.optionSelected.emit(ClickSelection)
