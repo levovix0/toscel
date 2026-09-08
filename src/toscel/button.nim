@@ -30,7 +30,7 @@ registerComponent Button
 proc text*(this: Button): var Property[string] =
   this.m_text.text
 
-proc clicked*(this: Button): var Event[void] {.deprecated: "ambiguous event, use this.activated for when Button is considered \"clicked\" (recomended, as it also handles \"clicks\" from touchscreen and keyboard), or this.MouseArea.clicked for when mouse pressed and released on this Button without moving. There is also this.mouseDownAndUpInside for when mouse was pressed and released inside this Button but may have moved".} =
+proc clicked*(this: Button): var Event[void] =
   this.activated
 
 converter asEvent*(this: Button): var Event[void] =
@@ -88,7 +88,7 @@ method init(this: Button) =
 
 
   this.makeLayout:
-    on this.mouseDownAndUpInside:
+    on this.clicked:
       if this.enabled[]:
         this.activated.emit()
 

@@ -1,5 +1,4 @@
 import std/[math]
-import pkg/pixie/[fonts]
 import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations]
 import ./[colors, fonts, focus, transitions]
 
@@ -71,7 +70,7 @@ method init*(this: ListWidget) =
               
               addTransition this.color
 
-            on this.mouseDownAndUpInside:
+            on this.clicked:
               setFocus root
               root.selectedItem[] = itemI
               root.itemSelected.emit(itemI)
