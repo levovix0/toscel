@@ -11,4 +11,4 @@ srcDir        = "src"
 
 requires "nim >= 2.2.0"
 
-requires "sigui >= 0.2.2"
+requires "sigui >= 0.3.0"
