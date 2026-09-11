@@ -49,8 +49,8 @@ proc adjustSize(this: Button) =
   
   let minW =
     10 +
-    (if this.icon != nil: textH + 10 else: 0) +
-   ( if this.m_text.text != "": this.m_text.w[] + 10 else: 0)
+    (if this.icon[] != nil: textH + 10 else: 0) +
+   ( if this.m_text.text[] != "": this.m_text.w[] + 10 else: 0)
 
   if this.hugContent or this.w[] < minW: this.w[] = minW
   this.h[] = 6 + textH + 6
@@ -62,7 +62,7 @@ proc adjustSize(this: Button) =
 
 
 proc onIconChanged(this: Button) =
-  if this.icon == nil:
+  if this.icon[] == nil:
     if this.m_svgImage != nil:
       delete this.m_svgImage
       this.m_svgImage = nil
@@ -176,7 +176,7 @@ method recieve*(this: Button, signal: Signal) =
 
 
 when isMainModule:
-  import sigui/globalKeybinding
+  import sigui/[globalKeybinding, windowCreation]
   import siwin
 
   proc main =

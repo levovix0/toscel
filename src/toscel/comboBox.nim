@@ -1,5 +1,4 @@
 import std/[math]
-import pkg/pixie/[fonts]
 import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations]
 import ./[colors, icons, fonts, lineEdit, transitions]
 
@@ -108,7 +107,7 @@ method init*(this: ComboBox) =
     --- ClipRect.new:
       <--- {update}: root.dropdownOpened[]; root.options[]
 
-      #layer = after root.parentUiRoot
+      #layer = after root.root
       # todo: global menu/popup layer
       # todo: signalLayer
 
@@ -121,7 +120,7 @@ method init*(this: ComboBox) =
         y = binding:
           let y = (root.selectedOption[].float32 * -optionHeight)
           let min = -root.globalY[]
-          let max = -root.globalY[] + root.parentUiRoot.h[] - this.h[]
+          let max = -root.globalY[] + root.root.h[] - this.h[]
           if min > max: y
           else: y.clamp(min, max)
 
@@ -129,7 +128,7 @@ method init*(this: ComboBox) =
           if signal of WindowEvent and signal.WindowEvent.event of MouseButtonEvent:
             let e = (ref MouseButtonEvent)(signal.WindowEvent.event)
             if e.pressed:
-              let pos = this.parentUiRoot.mouseState.pos - this.globalXy
+              let pos = this.root.mouseState.pos - this.globalXy
               if pos.x notin 0'f32..this.w[] or pos.y notin 0'f32..this.h[]:
                 root.dropdownOpened[] = false
           
@@ -215,7 +214,7 @@ method recieve*(this: ComboBox, signal: Signal) =
   if signal of WindowEvent and signal.WindowEvent.event of ScrollEvent:
     let e = (ref ScrollEvent)(signal.WindowEvent.event)
     if not signal.WindowEvent.handled and not this.dropdownOpened[]:
-      let pos = this.parentUiRoot.mouseState.pos - this.globalXy
+      let pos = this.root.mouseState.pos - this.globalXy
       if pos.x in 0'f32..this.w[] and pos.y in 0'f32..this.h[]:
         if this.options[].len != 0:
           if e.delta > 0:
