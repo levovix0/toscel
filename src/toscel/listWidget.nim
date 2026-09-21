@@ -1,5 +1,5 @@
 import std/[math]
-import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations]
+import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations, scrollArea]
 import ./[colors, fonts, focus, transitions]
 
 type
@@ -8,6 +8,7 @@ type
     selectedItem*: Property[int] = (-1).property
     
     itemSelected*: Event[int]
+    itemActivated*: Event[int]
 
 registerComponent ListWidget
 
@@ -25,14 +26,17 @@ method init*(this: ListWidget) =
       color = color_bg
       radius = radius_default
 
-    --- ClipRect.new:
-      <--- ClipRect.new: root.items[]
+    --- ScrollArea.new:
+      <--- {update}: root.items[]
+
+      + this.verticalScrollbar[].UiRect:
+        color = "#AAAAAA".color
       
       this.fill(parent)
       radius = radius_default
 
-      - Layout.vbox:
-        this.fill(parent)
+      - Layout.col:
+        this.fillHorizontal(parent)
         align = start
         fillContainer = true
 
@@ -91,10 +95,13 @@ method recieve*(this: ListWidget, signal: Signal) =
       if this.items[].len != 0:
         if e.key == Key.up:
           this.selectedItem[] = (this.selectedItem[] - 1).euclMod(this.items[].len)
-          this.itemSelected.emit(this.selectedItem[])
+          this.itemActivated.emit(this.selectedItem[])
           signal.WindowEvent.handled = true
         elif e.key == Key.down:
           this.selectedItem[] = (this.selectedItem[] + 1).euclMod(this.items[].len)
+          this.itemActivated.emit(this.selectedItem[])
+          signal.WindowEvent.handled = true
+        elif e.key == Key.enter:
           this.itemSelected.emit(this.selectedItem[])
           signal.WindowEvent.handled = true
 
