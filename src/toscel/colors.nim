@@ -58,5 +58,9 @@ const padding_panel_horizontal* = padding_default_horizontal * 2
 const padding_panel_vertical* = padding_default_vertical * 2
 
 
+const spacing_default_horizontal* = 7
+const spacing_default_vertical* = 7
+
+
 const width_control_default* = 100
 
