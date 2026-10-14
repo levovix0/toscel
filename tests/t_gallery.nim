@@ -1,4 +1,5 @@
-import pkg/sigui
+import std/[os, sequtils, algorithm]
+import pkg/[sigui]
 import toscel
 
 
@@ -9,69 +10,38 @@ win.makeLayout:
   this.clearColor = "202020".color
 
 
-  - Panel.new:
-    header = "Panel"
-    this.centerIn(parent)
-
-    - Layout.col:
+  - Panel(header = "Panel", centerIn(parent)):
+    - Layout(col(), align = center, gap = 10):
       parent.w[] = binding: this.w[] + parent.content.x[] + parent.content.margin.bottom
       parent.h[] = binding: this.h[] + parent.content.y[] + parent.content.margin.bottom
-      align = center
-      gap = 10
 
+      - Layout(row(), align = center, gap = 10):
+        - Label(text = "Label")
+        - Button(text = "Button")
+        - LineEdit(text = "LineEdit")
+        - ComboBox(options = @["ComboBox", "with", "text", "options"], selectedOption = 0)
 
-      - Layout.row:
-        align = center
-        gap = 10
-
-        - Label.new:
-          text = "Label"
-
-        - Button.new:
-          text = "Button"
-
-        - LineEdit.new:
-          text = "LineEdit"
-        
-        - ComboBox.new:
-          options = @["ComboBox", "with", "text", "options"]
-          selectedOption = 0
-
-
-      - Layout.row:
-        align = center
-        gap = 10
-
-        - Button.new:
-          enabled = false
-          text = "Button (disabled)"
+      - Layout(row(), align = center, gap = 10):
+        - Button(text = "Button (disabled)", enabled = false)
   
 
-  - PaletteArea.new:
+  - PaletteArea():
     this.fill(parent)
 
-    - Palette.new:
-      text = "Explorer"
-      icon = "format-text-direction-ltr".icon
-      
+    - Palette(text = "Explorer", icon = "format-text-direction-ltr".icon):
       + this.content:
         fill = "#202020".color
         w = 300
-        h = 200
+        h = 150
         y = 40
         x = 40
-        
-        - Layout.col:
-          this.fill(parent, padding_default_horizontal, padding_default_vertical)
-          - Label.new:
-            text = "file1.ext (todo: actual file exporer)"
-          
-          - Label.new:
-            text = "file2.ext"
 
-    - Palette.new:
-      text = "Icons"
-      icon = "smiley-add".icon
+        - ScrollArea(fill(parent)):
+          - Layout(col(), x = 10, gap = 10):
+            for x in walkDir(getCurrentDir(), relative = true).toSeq.sorted:
+              - Label(text = if x.kind == pcDir: x.path & "/" else: x.path)
+
+    - Palette(text = "Icons", icon = "smiley-add".icon):
       iconSize = 14  # anything bigger that 14 breaks at loadTexture
       iconTextLayout = IconTextVertical
       jointSide = Left
@@ -82,23 +52,16 @@ win.makeLayout:
         x = 100
         y = 300
 
-        - Layout.row:
+        - Layout(row(), gap = 10, wrap = true):
           top = parent.top + padding_default_vertical
           centerX = parent.center
-          wrap = true
           lengthBeforeWrap = binding: parent.w[] - 20
-          gap = 10
 
-          - Label.new:
-            text = "todo: icon1"
-          
-          - Label.new:
-            text = "todo: icon2"
-          
-          - Label.new:
-            text = "todo: icon3"
+          - Label(text = "todo: icon1")
+          - Label(text = "todo: icon2")
+          - Label(text = "todo: icon3")
 
 
-
+when defined(inspector): openInspector win
 run win
 

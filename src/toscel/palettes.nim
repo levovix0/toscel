@@ -1,6 +1,6 @@
 ## not to be confused with colors, palettes are movable and resizable panels
 
-import pkg/sigui/[uibase, layouts]
+import pkg/sigui/[uibase, layouts, mouseArea]
 import ./[colors, icons, fonts]
 
 type
@@ -23,24 +23,25 @@ type
   Palette* = ref object of Uiobj
     ## rect of the Palette determines current visible dimensions of palette title (tab)
     ## Palette always joins PaletteContent content at one of it's side, always inside PaletteArea, and is always outside of PaletteContent
-    text*: Property[string]
-    icon*: Property[Icon]
-    iconTextLayout*: Property[IconTextLayout]
+    text*: /string
+    icon*: /Icon
+    iconTextLayout*: /IconTextLayout
 
-    fontSize*: Property[float32] = 14'f32.property
-    iconSize*: Property[float32] = 14'f32.property
-    font*: Property[Typeface]
+    fontSize*: /float32 = /14'f32
+    iconSize*: /float32 = /14'f32
+    font*: /Typeface
 
     content*: PaletteContent
-    jointSide*: Property[JointSide]
+    jointSide*: /JointSide
 
     # group* {.cursor.}: PaletteGroup
     area* {.cursor.}: PaletteArea
+    mouse* {.cursor.}: MouseArea
 
   PaletteContent* = ref object of Uiobj
     ## rect of the PaletteContent can be set to determine the default position and size of it.
-    fill*: Property[Color] = color_bg.property
-    stroke*: Property[Color] = color_border_panel.property
+    fill*: /Color = /color_bg
+    stroke*: /Color = /color_border_panel
 
     palette* {.cursor.}: Palette
 
@@ -132,7 +133,6 @@ proc xy(size: Vec2, target: Uiobj, jointSide: JointSide): Vec2 =
 
 
 
-
 method init*(this: Palette) =
   procCall this.super.init()
 
@@ -155,7 +155,52 @@ method init*(this: Palette) =
       discard (this.w[], this.h[], this.content.x[], this.content.y[], this.content.w[], this.content.h[])
       xy(this.wh, this.content, this.jointSide[]).posToLocal(this.parent)
 
-    --- Layout.new:
+    template dragger(this: MouseArea, prop, val) =
+      var propOnPresse: typeof(prop)
+
+      this.grabbed.changed.connectTo this:
+        if this.grabbed[]:
+          propOnPresse = prop
+          # todo: raise the panel+content to the top of the PalleteArea
+      
+      this.moved.changed.connectTo this:
+        if this.pressed[]:
+          let d {.inject.} = (this.root.mouseState.pos - this.pressWindowPos)
+          prop = propOnPresse + val
+
+    - MouseArea(fill parent, dragger(root.content.globalXy, d)) as root.mouse
+
+    - MouseArea(layer = after root.content, dragger(root.content.w[], d.x)):
+      w = 5
+      centerX = root.content.right
+      top = parent.top
+      bottom = root.content.bottom
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeHorizontal)
+
+    - MouseArea(layer = after root.content, dragger(root.content.h[], d.y)):
+      h = 5
+      centerY = root.content.bottom
+      left = parent.left
+      right = root.content.right
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeVertical)
+
+    - MouseArea(layer = after root.content, dragger(root.content.x[], d.x), dragger(root.content.w[], -d.x)):
+      w = 5
+      centerX = root.left
+      top = parent.top
+      bottom = root.content.bottom
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeHorizontal)
+
+    - MouseArea(layer = after root.content, dragger(root.content.y[], d.y), dragger(root.content.h[], -d.y)):
+      h = 5
+      centerY = root.top
+      left = parent.left
+      right = root.content.right
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeVertical)
+    
+    # todo: h+v resizing on edges
+
+    --- Layout():
       <--- {update}: root.iconTextLayout[]
 
       if root.iconTextLayout[] in {TextIconVertical, IconTextVertical}:
@@ -178,14 +223,12 @@ method init*(this: Palette) =
       align = center
 
       if root.iconTextLayout[] != IconOnly:
-        - UiText.new:
+        - UiText(color = color_fg):
           font = binding: root.font[].withSize(root.fontSize[])
           text = binding: root.text[]
-          color = color_fg
 
       if root.iconTextLayout[] != TextOnly:
-        - UiSvgImage.new:
-          color = color_fg
+        - UiSvgImage(color = color_fg):
           image = binding:
             if root.icon[] != nil: root.icon[].svg
             else: ""
