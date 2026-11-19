@@ -126,7 +126,8 @@ method init(this: Button) =
       addTransition this.color
 
       - UiRect.new:
-        this.fill parent, 1
+        binding:
+          this.fill parent, 1/this.root.uiScale[]
         radius = 4
         color = binding:
           if root.accent[]:
@@ -185,11 +186,11 @@ when isMainModule:
     win.makeLayout:
       this.clearColor = color_bg
 
-      - globalKeybinding({Key.space}):
+      - (globalKeybinding({Key.space})):
         on this.activated:
           btn.accent[] = not btn.accent[]
 
-      - globalKeybinding({Key.tab}):
+      - (globalKeybinding({Key.tab})):
         on this.activated:
           setFocus btn
       
