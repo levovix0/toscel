@@ -22,7 +22,7 @@ method init*(this: ListWidget) =
 
     - UiRect.new:
       this.fill(parent)
-      color = color_bg
+      color = color_bg[]
       radius = radius_default
 
     --- ClipRect.new:
@@ -45,13 +45,13 @@ method init*(this: ListWidget) =
               this.fill(parent)
               color = binding:
                 if root.selectedItem[] == itemI:
-                  if parent.pressed[]: color_bg_accent_button_pressed
-                  elif parent.hovered[]: color_bg_accent_button_hovered
-                  else: color_bg_accent_button
+                  if parent.pressed[]: color_bg_accent_button_pressed[]
+                  elif parent.hovered[]: color_bg_accent_button_hovered[]
+                  else: color_bg_accent_button[]
                 else:
-                  if parent.pressed[]: color_bg_button_pressed
-                  elif parent.hovered[]: color_bg_button_hovered
-                  else: color_bg
+                  if parent.pressed[]: color_bg_button_pressed[]
+                  elif parent.hovered[]: color_bg_button_hovered[]
+                  else: color_bg[]
               
               addTransition this.color
 
@@ -63,10 +63,10 @@ method init*(this: ListWidget) =
               text = item
               color = binding:
                 if root.selectedItem[] == itemI:
-                  color_fg_accent
+                  color_fg_accent[]
                 else:
-                  if parent.hovered[]: color_fg_active
-                  else: color_fg
+                  if parent.hovered[]: color_fg_active[]
+                  else: color_fg[]
               
               addTransition this.color
 
@@ -80,7 +80,7 @@ method init*(this: ListWidget) =
       this.fill(parent)
       radius = radius_default
       borderWidth = borderWidth_default
-      color = color_border_button
+      color = color_border_button[]
 
 
 method recieve*(this: ListWidget, signal: Signal) =

@@ -8,7 +8,7 @@ type
 
   Label* = ref object of Uiobj
     text*: Property[string]
-    color*: Property[Color] = color_fg.property
+    color*: Property[Color]
     fontSize*: Property[float32] = 14'f32.property
     font*: Property[Typeface]
 
@@ -25,12 +25,14 @@ registerComponent Label
 method init*(this: ThemedUiText) =
   procCall this.super.init()
   
-  this.color[] = color_fg
+  this.color[] = color_fg[]
   this.font[] = font_default.withSize(14)
 
 
 method init*(this: Label) =
   procCall this.super.init()
+
+  this.color[] = color_fg[]
 
   this.makeLayout:
     font = font_default
@@ -58,7 +60,7 @@ method init*(this: Label) =
         color = binding: root.color[]
       
       + this.cursorObj[].UiRect:
-        color = color_fg_active
+        color = color_fg_active[]
 
 
 proc unselectable*(t: typedesc[Label]): ThemedUiText = new ThemedUiText

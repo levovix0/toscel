@@ -90,9 +90,9 @@ method init*(this: ComboBox) =
           
           image = "arrow-down".icon(fromToscel = true).svg
           color = binding:
-            if parent.pressed[]: color_fg_pressed
-            elif parent.hovered[]: color_fg_active
-            else: color_fg
+            if parent.pressed[]: color_fg_pressed[]
+            elif parent.hovered[]: color_fg_active[]
+            else: color_fg[]
         
         on this.clicked:
           root.dropdownOpened[] = not root.dropdownOpened[]
@@ -171,13 +171,13 @@ method init*(this: ComboBox) =
 
                 color = binding:
                   if root.selectedOption[] == optionI:
-                    if parent.pressed[]: color_bg_accent_button_pressed
-                    elif parent.hovered[]: color_bg_accent_button_hovered
-                    else: color_bg_accent_button
+                    if parent.pressed[]: color_bg_accent_button_pressed[]
+                    elif parent.hovered[]: color_bg_accent_button_hovered[]
+                    else: color_bg_accent_button[]
                   else:
-                    if parent.pressed[]: color_bg_button_pressed
-                    elif parent.hovered[]: color_bg_button_hovered
-                    else: color_bg_button
+                    if parent.pressed[]: color_bg_button_pressed[]
+                    elif parent.hovered[]: color_bg_button_hovered[]
+                    else: color_bg_button[]
                 
                 addTransition this.color
 
@@ -189,10 +189,10 @@ method init*(this: ComboBox) =
                 text = option
                 color = binding:
                   if root.selectedOption[] == optionI:
-                    color_fg_accent
+                    color_fg_accent[]
                   else:
-                    if parent.hovered[]: color_fg_active
-                    else: color_fg
+                    if parent.hovered[]: color_fg_active[]
+                    else: color_fg[]
                 
                 addTransition this.color
               
@@ -206,7 +206,7 @@ method init*(this: ComboBox) =
           this.fill(parent)
           radius = radius_default - 2
           borderWidth = borderWidth_default
-          color = color_border_lineEdit
+          color = color_border_lineEdit[]
 
 
 
