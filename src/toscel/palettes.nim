@@ -137,6 +137,12 @@ proc xy(size: Vec2, target: Uiobj, jointSide: JointSide): Vec2 =
   of Bottom: target.globalXy + vec2(0, target.h[])
 
 
+proc raiseToTop*(this: Palette) =
+  ## raises palette and it's content to the topmost layer of the PaletteArea
+  this.layer = this.area.after
+  this.content.layer = this.area.after
+
+
 proc minWidth*(this: Palette): float32 =
   ## min width that palette content can take with current jointSide
   ## (the axis with title joined to it can't be smaller than title, other axis can shrink to 0)
@@ -179,11 +185,14 @@ method init*(this: Palette) =
       when hasPos:
         var posOnPress: typeof(pPos)
 
+      this.pressed.changed.connectTo this:
+        if this.pressed[]:
+          root.raiseToTop()
+
       this.grabbed.changed.connectTo this:
         if this.grabbed[]:
           sizeOnPress = pSize
           when hasPos: posOnPress = pPos
-          # todo: raise the panel+content to the top of the PalleteArea
 
       this.moved.changed.connectTo this:
         if this.pressed[]:
@@ -327,6 +336,19 @@ method drawInner*(this: Palette, ctx: DrawContext) =
   if jointSide != Left:   ctx.fillRect(rect(this.globalXy, vec2(1, this.h[])), this.content.stroke[])
   if jointSide != Right:  ctx.fillRect(rect(this.globalXy + vec2(this.w[] - 1, 0), vec2(1, this.h[])), this.content.stroke[])
 
+
+
+method recieve*(this: PaletteContent, signal: Signal) =
+  ## raises the palette on mouse press and marks unhandled mouse events handled,
+  ## so palettes below don't recieve clicks through this palette
+  var pressInside = false
+  signal.match MouseButtonEvent:
+    if not signal.handled and e.pressed:
+      pressInside = this.root.mouseState.pos.overlaps(this.globalRect)
+
+  if pressInside: this.palette.raiseToTop()
+  procCall this.super.recieve(signal)
+  if pressInside: signal.WindowEvent.handled = true
 
 
 method drawInner*(this: PaletteContent, ctx: DrawContext) =
