@@ -34,6 +34,10 @@ type
     content*: PaletteContent
     jointSide*: /JointSide
 
+    titleSize*: /Vec2
+      ## size that the palette title (tab) takes, including padding.
+      ## set automatically, used to limit content resizing (see minWidth, minHeight)
+
     # group* {.cursor.}: PaletteGroup
     area* {.cursor.}: PaletteArea
     mouse* {.cursor.}: MouseArea
@@ -42,6 +46,7 @@ type
     ## rect of the PaletteContent can be set to determine the default position and size of it.
     fill*: /Color = /color_bg
     stroke*: /Color = /color_border_panel
+    minSize*: /Vec2  # todo: every sigui widget should be able to have min and max size for itself
 
     palette* {.cursor.}: Palette
 
@@ -127,9 +132,20 @@ proc invert*(x: JointSide): JointSide =
 proc xy(size: Vec2, target: Uiobj, jointSide: JointSide): Vec2 =
   case jointSide
   of Left:   target.globalXy - vec2(size.x, 0)
-  of Right:  target.globalXy + target.w[]
+  of Right:  target.globalXy + vec2(target.w[], 0)
   of Top:    target.globalXy - vec2(0, size.y)
-  of Bottom: target.globalXy + target.h[]
+  of Bottom: target.globalXy + vec2(0, target.h[])
+
+
+proc minWidth*(this: Palette): float32 =
+  ## min width that palette content can take with current jointSide
+  ## (the axis with title joined to it can't be smaller than title, other axis can shrink to 0)
+  this.content.minSize[].x + (if this.jointSide[] in {Top, Bottom}: this.titleSize[].x else: 0'f32)
+
+proc minHeight*(this: Palette): float32 =
+  ## min height that palette content can take with current jointSide
+  ## (the axis with title joined to it can't be smaller than title, other axis can shrink to 0)
+  this.content.minSize[].y + (if this.jointSide[] in {Top, Bottom}: 0'f32 else: this.titleSize[].y)
 
 
 
@@ -155,50 +171,98 @@ method init*(this: Palette) =
       discard (this.w[], this.h[], this.content.x[], this.content.y[], this.content.w[], this.content.h[])
       xy(this.wh, this.content, this.jointSide[]).posToLocal(this.parent)
 
-    template dragger(this: MouseArea, prop, val) =
-      var propOnPresse: typeof(prop)
+    template dragger(this: MouseArea, pSize, pPos, delta, minSize) =
+      const hasPos = astToStr(pPos) != "{none}"
+      const hasMinSize = astToStr(minSize) != "{none}"
+
+      var sizeOnPress: typeof(pSize)
+      when hasPos:
+        var posOnPress: typeof(pPos)
 
       this.grabbed.changed.connectTo this:
         if this.grabbed[]:
-          propOnPresse = prop
+          sizeOnPress = pSize
+          when hasPos: posOnPress = pPos
           # todo: raise the panel+content to the top of the PalleteArea
-      
+
       this.moved.changed.connectTo this:
         if this.pressed[]:
           let d {.inject.} = (this.root.mouseState.pos - this.pressWindowPos)
-          prop = propOnPresse + val
+          let deltaSize = (when hasMinSize: max(sizeOnPress + delta, minSize) else: sizeOnPress + delta) - sizeOnPress
+          pSize = sizeOnPress + deltaSize
+          when hasPos: pPos = posOnPress - deltaSize
 
-    - MouseArea(fill parent, dragger(root.content.globalXy, d)) as root.mouse
+    - MouseArea(fill parent, dragger(root.content.globalXy, {none}, d, {none})) as root.mouse
 
-    - MouseArea(layer = after root.content, dragger(root.content.w[], d.x)):
+    # side resize w/h (also x/y on the min side)
+    - MouseArea(layer = after root.content):
       w = 5
       centerX = root.content.right
       top = parent.top
       bottom = root.content.bottom
       cursor = (ref Cursor)(kind: builtin, builtin: sizeHorizontal)
+      this.dragger(root.content.w[], {none}, d.x, root.minWidth())
 
-    - MouseArea(layer = after root.content, dragger(root.content.h[], d.y)):
+    - MouseArea(layer = after root.content):
       h = 5
       centerY = root.content.bottom
       left = parent.left
       right = root.content.right
       cursor = (ref Cursor)(kind: builtin, builtin: sizeVertical)
+      this.dragger(root.content.h[], {none}, d.y, root.minHeight())
 
-    - MouseArea(layer = after root.content, dragger(root.content.x[], d.x), dragger(root.content.w[], -d.x)):
+    - MouseArea(layer = after root.content):
       w = 5
       centerX = root.left
       top = parent.top
       bottom = root.content.bottom
       cursor = (ref Cursor)(kind: builtin, builtin: sizeHorizontal)
+      this.dragger(root.content.w[], root.content.x[], -d.x, root.minWidth())
 
-    - MouseArea(layer = after root.content, dragger(root.content.y[], d.y), dragger(root.content.h[], -d.y)):
+    - MouseArea(layer = after root.content):
       h = 5
       centerY = root.top
       left = parent.left
       right = root.content.right
       cursor = (ref Cursor)(kind: builtin, builtin: sizeVertical)
-    
-    # todo: h+v resizing on edges
+      this.dragger(root.content.h[], root.content.y[], -d.y, root.minHeight())
+
+    # corners resize w+h at once (also x/y on the min side)
+    - MouseArea(layer = after root.content):
+      w = 10
+      h = 10
+      centerX = root.content.right
+      centerY = root.content.bottom
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeBottomRight)
+      this.dragger(root.content.w[], {none}, d.x, root.minWidth())
+      this.dragger(root.content.h[], {none}, d.y, root.minHeight())
+
+    - MouseArea(layer = after root.content):
+      w = 10
+      h = 10
+      centerX = root.left
+      centerY = root.content.bottom
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeBottomLeft)
+      this.dragger(root.content.w[], root.content.x[], -d.x, root.minWidth())
+      this.dragger(root.content.h[], {none}, d.y, root.minHeight())
+
+    - MouseArea(layer = after root.content):
+      w = 10
+      h = 10
+      centerX = root.content.right
+      centerY = root.top
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeTopRight)
+      this.dragger(root.content.w[], {none}, d.x, root.minWidth())
+      this.dragger(root.content.h[], root.content.y[], -d.y, root.minHeight())
+
+    - MouseArea(layer = after root.content):
+      w = 10
+      h = 10
+      centerX = root.left
+      centerY = root.top
+      cursor = (ref Cursor)(kind: builtin, builtin: sizeTopLeft)
+      this.dragger(root.content.w[], root.content.x[], -d.x, root.minWidth())
+      this.dragger(root.content.h[], root.content.y[], -d.y, root.minHeight())
 
     --- Layout():
       <--- {update}: root.iconTextLayout[]
@@ -247,6 +311,9 @@ method init*(this: Palette) =
         else:
           size.y = max(size.y, root.content.h[])
         size
+
+      parent.titleSize[] = binding:
+        vec2(this.w[] + padding_default_horizontal*2, this.h[] + padding_default_vertical*2)
 
 
 

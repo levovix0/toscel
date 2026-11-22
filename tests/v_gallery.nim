@@ -3,7 +3,9 @@ import pkg/[sigui]
 import toscel
 
 
-let win = newUiWindow(title="Toscel component library galery")
+let win =
+  when defined(headless): newHeadlessUiWindow(size = ivec2(1280, 720))
+  else: newUiWindow(title="Toscel component library galery")
 
 
 win.makeLayout:
@@ -51,6 +53,7 @@ win.makeLayout:
         h = 200
         x = 100
         y = 300
+        minSize = vec2(180, 100)
 
         - Layout(row(), gap = 10, wrap = true):
           top = parent.top + padding_default_vertical
@@ -62,6 +65,10 @@ win.makeLayout:
           - Label(text = "todo: icon3")
 
 
-when defined(inspector): openInspector win
-run win
+when defined(headless):
+  createDir("local_screenshots")
+  win.saveScreenshot("local_screenshots/gallery.png")
+else:
+  when defined(inspector): openInspector win
+  run win
 
