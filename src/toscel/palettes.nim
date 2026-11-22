@@ -37,6 +37,8 @@ type
     titleSize*: /Vec2
       ## size that the palette title (tab) takes, including padding.
       ## set automatically, used to limit content resizing (see minWidth, minHeight)
+    cursor*: Property[ref Cursor] = /(ref Cursor)(kind: builtin, builtin: arrow)
+      ## base mouse cursor for panel and it's contents
 
     # group* {.cursor.}: PaletteGroup
     area* {.cursor.}: PaletteArea
@@ -201,7 +203,8 @@ method init*(this: Palette) =
           pSize = sizeOnPress + deltaSize
           when hasPos: pPos = posOnPress - deltaSize
 
-    - MouseArea(fill parent, dragger(root.content.globalXy, {none}, d, {none})) as root.mouse
+    - MouseArea(fill parent, dragger(root.content.globalXy, {none}, d, {none})) as root.mouse:
+      cursor = binding: root.cursor[]
 
     # side resize w/h (also x/y on the min side)
     - MouseArea(layer = after root.content):
@@ -342,13 +345,24 @@ method recieve*(this: PaletteContent, signal: Signal) =
   ## raises the palette on mouse press and marks unhandled mouse events handled,
   ## so palettes below don't recieve clicks through this palette
   var pressInside = false
+  let hovered = this.root.mouseState.pos.overlaps(this.globalRect)
+  
   signal.match MouseButtonEvent:
     if not signal.handled and e.pressed:
-      pressInside = this.root.mouseState.pos.overlaps(this.globalRect)
+      pressInside = hovered
 
-  if pressInside: this.palette.raiseToTop()
+  if pressInside:
+    this.palette.raiseToTop()
+
   procCall this.super.recieve(signal)
-  if pressInside: signal.WindowEvent.handled = true
+  
+  signal.match GetActiveCursor:
+    if not signal.handled and hovered:
+      signal.cursor = this.palette.cursor[]
+      signal.handled = true
+  
+  if pressInside:
+    signal.WindowEvent.handled = true
 
 
 method drawInner*(this: PaletteContent, ctx: DrawContext) =
