@@ -15,6 +15,7 @@
 /docs
 /deps
 /nim.cfg
+/AGENTS.md
 nimcache
 
 local_*
