@@ -68,6 +68,7 @@ method init*(this: ModalOverlay) =
             if e.pressed:
               let pos = this.root.mouseState.pos - root.content.globalXy
               if pos.x notin 0'f32..root.content.w[] or pos.y notin 0'f32..root.content.h[]:
+                signal.WindowEvent.handled = true
                 root.opened[] = false
 
     - Uiobj.new as root.content:  # persistent content box, centered in the window
