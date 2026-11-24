@@ -1,5 +1,4 @@
 import pkg/sigui/[uibase, mouseArea, animations]
-import ./[colors, fonts, transitions]
 
 type
   ModalOverlay* = ref object of MouseArea
@@ -19,16 +18,16 @@ registerComponent ModalOverlay
 # children of the overlay are placed into `content`,
 # these anchors are relative to the content box (like Panel's anchors)
 proc left*(this: ModalOverlay, margin: float32 = 0): Anchor =
-  this.content.Uiobj.left(margin)
+  this.content.left(margin)
 
 proc right*(this: ModalOverlay, margin: float32 = 0): Anchor =
-  this.content.Uiobj.right(margin)
+  this.content.right(margin)
 
 proc top*(this: ModalOverlay, margin: float32 = 0): Anchor =
-  this.content.Uiobj.top(margin)
+  this.content.top(margin)
 
 proc bottom*(this: ModalOverlay, margin: float32 = 0): Anchor =
-  this.content.Uiobj.bottom(margin)
+  this.content.bottom(margin)
 
 proc center*(this: ModalOverlay, margin: float32 = 0): Anchor =
   this.content.center(margin)
@@ -51,6 +50,8 @@ method init*(this: ModalOverlay) =
         - MouseArea.new:
           # consumes clicks so that they don't reach the ui under the overlay
           this.fill(parent)
+
+          cursor = (ref Cursor)(kind: builtin, builtin: arrow)
 
           - UiRect.new:
             this.fill(parent)

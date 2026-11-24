@@ -1,5 +1,5 @@
 import std/[math]
-import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations]
+import pkg/sigui/[events, properties, uibase, mouseArea, layouts, animations, scrollArea]
 import ./[colors, fonts, focus, transitions]
 
 type
@@ -22,19 +22,27 @@ method init*(this: ListWidget) =
 
     - UiRect.new:
       this.fill(parent)
-      color = color_bg[]
+      color = binding: color_bg[]
       radius = radius_default
 
-    --- ClipRect.new:
-      <--- ClipRect.new: root.items[]
+    - UiRectBorder.new:
+      layer = after parent
+      this.fill(parent)
+      radius = radius_default
+      borderWidth = borderWidth_default
+      color = binding: color_border_panel[]
+
+    --- ScrollArea.new:
+      <--- ScrollArea.new: root.items[]
       
       this.fill(parent)
       radius = radius_default
 
       - Layout.vbox:
-        this.fill(parent)
+        this.fillHorizontal(parent)
         align = start
         fillContainer = true
+        hugContent = true
 
         for itemI, item in root.items[]:
           - MouseArea.new:
@@ -74,13 +82,6 @@ method init*(this: ListWidget) =
               setFocus root
               root.selectedItem[] = itemI
               root.itemSelected.emit(itemI)
-
-    - UiRectBorder.new:
-      layer = after parent
-      this.fill(parent)
-      radius = radius_default
-      borderWidth = borderWidth_default
-      color = color_border_button[]
 
 
 method recieve*(this: ListWidget, signal: Signal) =

@@ -107,7 +107,7 @@ method init*(this: ComboBox) =
     --- ClipRect.new:
       <--- {update}: root.dropdownOpened[]; root.options[]
 
-      #layer = after root.root
+      layer = after root.root
       # todo: global menu/popup layer
       # todo: signalLayer
 

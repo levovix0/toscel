@@ -6,8 +6,9 @@ type
   MenuEntry* = object
     ## a single row of a dropdown menu.
     ## note: the fields are plain values and procs (not properties),
-    ## because entries are stored in a seq and are re-evaluated every
-    ## time the menu is opened
+    ## because entries are re-evaluated every time the menu is opened.
+    ## todo: make it an auto-composable Uiobj instead to be consistent with the rest of sigui (doing data models required thought-out support in sigui and massive refactoring)
+    ## todo: allow to compose MenuEntry inside MenuEntry (submenus)
     text*: string
     shortcut*: string
       ## hint displayed on the right (e.g. "Ctrl+O"),
@@ -18,7 +19,7 @@ type
       ## the action is responsible for changing the underlying state
     disabled*: proc(): bool = nil
       ## nil = always enabled, evaluated when the menu opens
-    action*: proc()
+    action*: proc()  # todo: use clicked*: Event[void]
     isSeparator*: bool
 
   MenuButton* = ref object of MouseArea
@@ -79,9 +80,14 @@ method init(this: MenuButton) =
       radius = 4
 
       color = binding:
-        if root.opened[]: color_bg_button_pressed[]
-        elif parent.hovered[]: color_bg_button_hovered[]
-        else: "#00000000".color
+        if root.opened[]:
+          if root.pressed[]: color_bg_accent_button_pressed[]
+          elif root.hovered[]: color_bg_accent_button_hovered[]
+          else: color_bg_accent_button[]
+        else:
+          if root.pressed[]: color_bg_menubar_pressed[]
+          elif root.hovered[]: color_bg_menubar_hovered[]
+          else: color_bg_menubar[]
 
       addTransition this.color
 
@@ -91,7 +97,8 @@ method init(this: MenuButton) =
       font = font_default.withSize(menuFontSize)
       text = binding: root.text[]
       color = binding:
-        if root.opened[] or parent.hovered[]: color_fg_active[]
+        if root.opened[]: color_fg_accent[]
+        elif root.hovered[] or root.pressed[]: color_fg_active[]
         else: color_fg[]
 
       addTransition this.color
@@ -113,15 +120,15 @@ method init(this: MenuButton) =
     opened = binding:
       root.menuBar.openedIndex[] == root.index
 
-    --- Uiobj.new:  # dropdown, recreated when opened state or entries change
+    --- Uiobj.new:  # dropdown, recreated when opened state or entries change  # todo: move to a separate component
       <--- {update}: root.opened[]; root.entries[]
 
-      if root.opened[]:
+      if root.opened[]:  # todo: `if ...: break` syntax for makeLayout
         let font = font_default.withSize(menuFontSize)
         let rowH = menuRowHeight
 
         # the dropdown must be above all other menubar content
-        this.layer = root.menuBar.after
+        layer = after root.root
 
         var maxTextW = 0'f32
         var maxShortcutW = 0'f32
@@ -135,11 +142,11 @@ method init(this: MenuButton) =
             if entry.shortcut.len > 0:
               (maxShortcutW) = max(maxShortcutW, font.layoutBounds(entry.shortcut).x)
 
-        this.w[] = menuPad * 2 + menuCheckAreaWidth + maxTextW +
+        w = menuPad * 2 + menuCheckAreaWidth + maxTextW +
           (if maxShortcutW > 0: menuShortcutGap + maxShortcutW else: 0'f32) + 2
-        this.h[] = rowsCount * rowH
-        this.x[] = 0
-        this.y[] = parent.h[]
+        h = rowsCount * rowH + menuPad * 2
+        x = 0
+        y = parent.h[]
 
         # close on escape always, on click outside of the dropdown and the menubar,
         # clicks on the menubar are handled by the menubar buttons themselves
@@ -163,8 +170,15 @@ method init(this: MenuButton) =
           radius = 5
           color = color_bg_button[]
 
-        - Uiobj.new:  # rows
+        - UiRectBorder.new:
+          layer = after parent
           this.fill(parent)
+          radius = 5
+          borderWidth = borderWidth_default
+          color = color_border_button[]
+
+        - Uiobj.new:  # rows
+          this.fill(parent, 0, menuPad)
 
           var rowY = 0'f32
           for entryI, entry in root.entries[]:
@@ -181,6 +195,9 @@ method init(this: MenuButton) =
               rowY += menuRowHeight / 2
 
             else:
+              # todo: unchecked checkable menu items are currently visually indistinguishable from uncheckable menu items, draw a box to indicate them
+              # todo: when no items in the menu have icon and is checkable, don't indent them
+              # todo: allow adding icons for menu items
               let enabled = (entry.disabled == nil) or (not entry.disabled())
               let checked = entry.checkable and entry.checked != nil and entry.checked()
 
@@ -196,10 +213,10 @@ method init(this: MenuButton) =
                   radius = 4
 
                   color = binding:
-                    if not enabled: "#00000000".color
+                    if not enabled: color_bg_button[]
                     elif parent.pressed[]: color_bg_button_pressed[]
                     elif parent.hovered[]: color_bg_button_hovered[]
-                    else: "#00000000".color
+                    else: color_bg_button[]
 
                   addTransition this.color
 
@@ -250,13 +267,6 @@ method init(this: MenuButton) =
 
               rowY += rowH
 
-        - UiRectBorder.new:
-          layer = after parent
-          this.fill(parent)
-          radius = 5
-          borderWidth = borderWidth_default
-          color = color_border_button[]
-
 
 proc clearMenus*(this: MenuBar) =
   ## removes all menus, e.g. to rebuild them in another language
@@ -269,7 +279,7 @@ proc clearMenus*(this: MenuBar) =
 
 proc addMenu*(this: MenuBar, title: string, entries: seq[MenuEntry]) =
   ## adds a menu; to rebuild menus (e.g. in another language),
-  ## use `clearMenus` and add them again
+  ## use `clearMenus` and add them again  # todo: this is why properties exist and are used everywhere in UI layer in sigui
   let button = MenuButton()
   button.menuBar = this
   button.index = this.buttons.len

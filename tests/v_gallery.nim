@@ -12,28 +12,13 @@ var wordWrap = true
 
 
 win.makeLayout:
-  this.clearColor = "202020".color
+  this.clearColor = binding: color_bg[]
 
 
   - Panel(header = "Panel", centerIn(parent)):
     - Layout(col(), align = center, gap = 10):
       parent.w[] = binding: this.w[] + parent.content.x[] + parent.content.margin.bottom
       parent.h[] = binding: this.h[] + parent.content.y[] + parent.content.margin.bottom
-
-      - Layout(row(), align = center, gap = 10):
-        - Label(text = "Label")
-        - Button(text = "Button")
-        - LineEdit(text = "LineEdit")
-        - ComboBox(options = @["ComboBox", "with", "text", "options"], selectedOption = 0)
-
-      - Layout(row(), align = center, gap = 10):
-        - Button(text = "Button (disabled)", enabled = false)
-
-      - Layout(row(), align = center, gap = 10):
-        - ListWidget(items = @["ListWidget", "item 2", "item 3", "item 4", "item 5", "item 6"], selectedItem = 2)
-
-        - Button(text = "Show ModalOverlay"):
-          on this.clicked: modal.opened[] = true
 
       - MenuBar.new as (menuBar):
         this.addMenu("File", @[
@@ -50,10 +35,30 @@ win.makeLayout:
           MenuEntry(text: "Word wrap", checkable: true, checked: proc(): bool = wordWrap, action: proc() = wordWrap = not wordWrap),
         ])
 
+        this.addMenu("Settings", @[
+          MenuEntry(text: "Dark theme", shortcut: "Ctrl+T", checkable: true, checked: proc(): bool = currentToscelTheme[] == ttkDark, action: proc() =
+            setToscelTheme case currentToscelTheme[]
+              of ttkDark: ttkLight
+              of ttkLight: ttkDark
+          ),
+        ])
+
         this.addMenu("Help", @[MenuEntry(text: "About")])
 
-  # dropdowns and the overlay are drawn only above what was added before them,
-  # so MenuBar is the last panel row and ModalOverlay the last child of the window
+      - Layout(row(), align = center, gap = 10):
+        - Label(text = "Label")
+        - Button(text = "Button")
+        - LineEdit(text = "LineEdit")
+        - ComboBox(options = @["ComboBox", "with", "text", "options"], selectedOption = 0)
+
+      - Layout(row(), align = center, gap = 10):
+        - Button(text = "Button (disabled)", enabled = false)
+
+      - ListWidget(items = @["ListWidget", "item 2", "item 3", "item 4", "item 5", "item 6", "item 7", "item 8", "item 9"], selectedItem = 2)
+
+      - Button(text = "Show ModalOverlay"):
+        on this.clicked: modal.opened[] = true
+
   - ModalOverlay.new as (modal):
     + this.content:
       w = 300

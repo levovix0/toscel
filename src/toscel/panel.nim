@@ -43,13 +43,13 @@ method init*(this: Panel) =
       this.fill parent.Uiobj
       
       radius = 5
-      color = color_border_panel[]
+      color = binding: color_border_panel[]
 
     - UiRect.new as root.background:
       this.fill parent.Uiobj, 1
 
       radius = 4
-      color = color_bg[]
+      color = binding: color_bg[]
 
     - Uiobj.new as root.headerObj:
       this.fillHorizontal(parent.Uiobj)

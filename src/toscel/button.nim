@@ -104,7 +104,7 @@ method init(this: Button) =
       x = -6
       blurRadius = 6
       radius = 5
-      color = color_shadow[]
+      color = binding: color_shadow[]
 
     - UiRect.new as border:
       root.m_background = this

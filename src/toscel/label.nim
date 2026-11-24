@@ -32,10 +32,10 @@ method init*(this: ThemedUiText) =
 method init*(this: Label) =
   procCall this.super.init()
 
-  this.color[] = color_fg[]
 
   this.makeLayout:
     font = font_default
+    color = binding: color_fg[]
 
     - TextArea.new as textArea:
       this.fill(parent)
@@ -60,7 +60,7 @@ method init*(this: Label) =
         color = binding: root.color[]
       
       + this.cursorObj[].UiRect:
-        color = color_fg_active[]
+        color = binding: color_fg_active[]
 
 
 proc unselectable*(t: typedesc[Label]): ThemedUiText = new ThemedUiText

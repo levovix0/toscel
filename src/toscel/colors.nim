@@ -26,6 +26,10 @@ type
     color_bg_accent_button_pressed* = "#6DE375".color.darken(0.1)
     color_bg_accent_button_disabled* = "#303030".color
 
+    color_bg_menubar* = "#202020".color
+    color_bg_menubar_hovered* = "#282828".color
+    color_bg_menubar_pressed* = "#1b1b1b".color
+
     color_fg* = "#cbcbcb".color
     color_fg_active* = "#ffffff".color
     color_fg_pressed* = "#ababab".color
@@ -75,17 +79,21 @@ const darkTheme* = ToscelTheme()
 const lightTheme* = ToscelTheme(
   color_accent: "#3BB44A".color,
 
-  color_bg: "#f3f3f3".color,
+  color_bg: "#ffffff".color,
 
-  color_bg_button: "#e8e8e8".color,
-  color_bg_button_hovered: "#dcdcdc".color,
-  color_bg_button_pressed: "#efefef".color,
-  color_bg_button_disabled: "#e4e4e4".color,
+  color_bg_button: "#ffffff".color,
+  color_bg_button_hovered: "#f2f2f2".color,
+  color_bg_button_pressed: "#e8e8e8".color,
+  color_bg_button_disabled: "#ffffff".color,
 
   color_bg_accent_button: "#3BB44A".color,
   color_bg_accent_button_hovered: "#3BB44A".color.lighten(0.1),
   color_bg_accent_button_pressed: "#3BB44A".color.darken(0.1),
   color_bg_accent_button_disabled: "#e4e4e4".color,
+
+  color_bg_menubar: "#ffffff".color,
+  color_bg_menubar_hovered: "#f2f2f2".color,
+  color_bg_menubar_pressed: "#e8e8e8".color,
 
   color_fg: "#333333".color,
   color_fg_active: "#000000".color,
@@ -97,7 +105,7 @@ const lightTheme* = ToscelTheme(
 
   color_border: "#a0a0a0".color,
 
-  color_border_button: "#c2c2c2".color,
+  color_border_button: "#a0a0a0".color,
   color_border_button_disabled: "#c2c2c2".color,
 
   color_border_accent_button: "#3BB44A".color.darken(0.15),
@@ -108,9 +116,9 @@ const lightTheme* = ToscelTheme(
   color_border_lineEdit_invalid: "#e05c5c".color,
   color_border_accent_lineEdit_invalid: "#e05c5c".color.darken(0.1),
 
-  color_border_panel: "#c2c2c2".color,
+  color_border_panel: "#a0a0a0".color,
 
-  color_shadow: "#00000035".color,
+  color_shadow: "#00000020".color,
 )
 
 
