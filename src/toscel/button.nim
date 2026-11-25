@@ -104,7 +104,7 @@ method init(this: Button) =
       x = -6
       blurRadius = 6
       radius = 5
-      color = color_shadow
+      color = binding: color_shadow[]
 
     - UiRect.new as border:
       root.m_background = this
@@ -112,16 +112,16 @@ method init(this: Button) =
       radius = 5
       color = binding:
         if not root.enabled[]:
-          if root.accent[]: color_border_button_disabled
-          else: color_border_accent_button_disabled
+          if root.accent[]: color_border_button_disabled[]
+          else: color_border_accent_button_disabled[]
         elif currentFocus[] == root and currentFocusSource notin {focusFromMouse, focusDefault}:
           let c =
-            if root.accent[]: color_border_accent_button.lighten(0.1)
-            else: color_border_accent_button
+            if root.accent[]: color_border_accent_button[].lighten(0.1)
+            else: color_border_accent_button[]
           if root.pressed[] or root.pressedByKeyboard[]: c.darken(0.2)
           else: c
-        elif root.accent[]: color_border_accent_button
-        else: color_border_button
+        elif root.accent[]: color_border_accent_button[]
+        else: color_border_button[]
 
       addTransition this.color
 
@@ -131,16 +131,16 @@ method init(this: Button) =
         radius = 4
         color = binding:
           if root.accent[]:
-            if not root.enabled[]: color_bg_accent_button_disabled
-            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed
-            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed
-            elif root.hovered[]: color_bg_accent_button_hovered
-            else: color_bg_accent_button
+            if not root.enabled[]: color_bg_accent_button_disabled[]
+            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed[]
+            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_accent_button_pressed[]
+            elif root.hovered[]: color_bg_accent_button_hovered[]
+            else: color_bg_accent_button[]
           else:
-            if not root.enabled[]: color_bg_button_disabled
-            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_button_pressed
-            elif root.hovered[]: color_bg_button_hovered
-            else: color_bg_button
+            if not root.enabled[]: color_bg_button_disabled[]
+            elif root.pressed[] or root.pressedByKeyboard[]: color_bg_button_pressed[]
+            elif root.hovered[]: color_bg_button_hovered[]
+            else: color_bg_button[]
 
         addTransition this.color
 
@@ -151,10 +151,10 @@ method init(this: Button) =
       font = font_default.withSize(14)
 
       color = binding:
-        if not root.enabled[]: color_fg_disabled
-        elif root.accent[]: color_fg_accent
-        elif root.pressed[] or root.hovered[]: color_fg_active
-        else: color_fg
+        if not root.enabled[]: color_fg_disabled[]
+        elif root.accent[]: color_fg_accent[]
+        elif root.pressed[] or root.hovered[]: color_fg_active[]
+        else: color_fg[]
       
       addTransition this.color
   
@@ -184,7 +184,7 @@ when isMainModule:
     let win = newUiWindow(size=ivec2(200, 100))
 
     win.makeLayout:
-      this.clearColor = color_bg
+      this.clearColor = color_bg[]
 
       - (globalKeybinding({Key.space})):
         on this.activated:

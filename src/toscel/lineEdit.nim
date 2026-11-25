@@ -37,11 +37,11 @@ method init*(this: LineEdit) =
       borderWidth = 1
       color = binding:
         if root.valid[]:
-          if textArea.active[]: color_border_accent_lineEdit
-          else: color_border_lineEdit
+          if textArea.active[]: color_border_accent_lineEdit[]
+          else: color_border_lineEdit[]
         else:
-          if textArea.active[]: color_border_accent_lineEdit_invalid
-          else: color_border_lineEdit_invalid
+          if textArea.active[]: color_border_accent_lineEdit_invalid[]
+          else: color_border_lineEdit_invalid[]
       
       addTransition this.color, 0.2's
       
@@ -67,8 +67,8 @@ method init*(this: LineEdit) =
         font = font_default.withSize(14)
 
         color = binding:
-          if textArea.active[]: color_fg_active
-          else: color_fg
+          if textArea.active[]: color_fg_active[]
+          else: color_fg[]
       
         addTransition this.color, 0.2's
     
@@ -85,9 +85,9 @@ method init*(this: LineEdit) =
           addTransition this.color, 0.2's
 
           color = binding:
-            if textArea.active[]: color_fg_placeholder_active
-            else: color_fg_placeholder
+            if textArea.active[]: color_fg_placeholder_active[]
+            else: color_fg_placeholder[]
       
       + this.cursorObj[]: + this.UiRect:
-        color = color_fg_active
+        color = color_fg_active[]
 
